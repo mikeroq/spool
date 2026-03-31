@@ -33,7 +33,7 @@ const DEFAULT_STATE = {
   runNumber: 1,
 };
 
-let state = { ...DEFAULT_STATE };
+let state = { ...DEFAULT_STATE, usedScenarioChoices: new Set() };
 let typewriterQueue = [];
 let isTyping = false;
 let choicesLocked = false;
@@ -452,6 +452,11 @@ const SCENARIOS = [
     startAlert: 'WARNING: PRINTER HAS ENTERED UNSTABLE SPIRITUAL STATE',
     startLog: 'Quarterly report print job submitted',
     startState: {},
+    choices: [
+      { text: 'Email the report instead',        action: () => 'qr_email_it'      },
+      { text: 'Ask a colleague to print it',     action: () => 'qr_ask_colleague' },
+      { text: 'Try printing to PDF',             action: () => 'qr_print_to_pdf'  },
+    ],
     lines: [
       { text: '[ INCIDENT LOG — PRIORITY: MAXIMUM ]', css: 'text-system' },
       '',
@@ -484,6 +489,11 @@ const SCENARIOS = [
     startAlert: 'ALERT: HIGH-STAKES DOCUMENT DETECTED — TONER RESERVES TIGHTENING',
     startLog: 'Resignation letter — departure ceremony at 5PM',
     startState: { toner: 35 },
+    choices: [
+      { text: 'Reconsider — maybe don\'t resign',      action: () => 'rl_reconsider'          },
+      { text: 'Ask the printer if you should stay',    action: () => 'rl_ask_printer_opinion' },
+      { text: 'Print your CV instead, just in case',  action: () => 'rl_print_cv'            },
+    ],
     lines: [
       { text: '[ INCIDENT LOG — CATEGORY: EXISTENTIAL ]', css: 'text-system' },
       '',
@@ -516,6 +526,11 @@ const SCENARIOS = [
     startAlert: 'WARNING: CEREMONIAL DOCUMENT LOAD — TRAY SPIRITUALLY UNPREPARED',
     startLog: 'Wedding invitations — ceremony tomorrow at 2PM',
     startState: { faith: 65, jam: 10 },
+    choices: [
+      { text: 'Explain the importance of the occasion', action: () => 'wi_explain_occasion' },
+      { text: 'Invite the printer to the wedding',      action: () => 'wi_invite_printer'   },
+      { text: 'Print just one copy as a test',          action: () => 'wi_test_copy'        },
+    ],
     lines: [
       { text: '[ INCIDENT LOG — OCCASION: MATRIMONIAL ]', css: 'text-system' },
       '',
@@ -548,6 +563,11 @@ const SCENARIOS = [
     startAlert: 'CRITICAL: IRS DEADLINE IN 94 MINUTES — PRINTER UNMOVED BY LEGAL PRESSURE',
     startLog: 'Tax return — IRS deadline tonight',
     startState: { mood: 40, toner: 45 },
+    choices: [
+      { text: 'Threaten it with an IRS audit',        action: () => 'tr_irs_threat'       },
+      { text: 'Claim the printer as a tax deduction', action: () => 'tr_claim_deduction'  },
+      { text: 'Simplify the return to one page',      action: () => 'tr_simplify_return'  },
+    ],
     lines: [
       { text: '[ INCIDENT LOG — AUTHORITY: FEDERAL ]', css: 'text-system' },
       '',
@@ -580,6 +600,11 @@ const SCENARIOS = [
     startAlert: 'WARNING: KEYNOTE IN 8 MINUTES — PRINTER ENTERING CONTEMPLATIVE STATE',
     startLog: '50-copy handout job — keynote in 8 minutes',
     startState: { pagesRemaining: 50, toner: 60, jam: 5 },
+    choices: [
+      { text: 'Reduce to 10 copies — people can share', action: () => 'ch_reduce_copies' },
+      { text: 'Walk onstage without handouts',          action: () => 'ch_go_onstage'    },
+      { text: 'Print only the title page, hold it up', action: () => 'ch_title_only'    },
+    ],
     lines: [
       { text: '[ INCIDENT LOG — VENUE: MAIN STAGE ]', css: 'text-system' },
       '',
@@ -612,6 +637,11 @@ const SCENARIOS = [
     startAlert: 'NOTICE: SELF-ASSESSMENT DOCUMENT DETECTED — PRINTER JUDGING IN RETURN',
     startLog: 'Self-assessment due — HR waiting upstairs',
     startState: { faith: 40, mood: 45 },
+    choices: [
+      { text: 'Lower your self-rating to appease it',           action: () => 'pr_lower_rating'       },
+      { text: 'Ask the printer to rate your performance',       action: () => 'pr_printer_rates_you'  },
+      { text: 'Add "Excellent printer relations" to your CV',   action: () => 'pr_add_printer_praise' },
+    ],
     lines: [
       { text: '[ INCIDENT LOG — SUBJECT: SELF-EVALUATION ]', css: 'text-system' },
       '',
@@ -643,6 +673,11 @@ const SCENARIOS = [
     startAlert: 'CRITICAL: UNCLASSIFIED PRINT DESTINATION FOR CLASSIFIED PAYLOAD',
     startLog: 'Document: CLASSIFIED — origin: unknown sender in IT',
     startState: { mood: 45, faith: 55, toner: 55 },
+    choices: [
+      { text: 'Peek at the document before printing',      action: () => 'cd_peek_document'        },
+      { text: 'Demand authorization before proceeding',    action: () => 'cd_demand_authorization' },
+      { text: 'Print it immediately and tell no one',      action: () => 'cd_print_fast'           },
+    ],
     lines: [
       { text: '[ INCIDENT LOG — CLEARANCE: UNKNOWN ]', css: 'text-system' },
       '',
@@ -1461,6 +1496,1013 @@ const SCENES = {
     },
     choices: () => getStandardChoices(),
   },
+
+  // ==========================================
+  // SCENARIO SCENES — QUARTERLY REPORT
+  // ==========================================
+
+  qr_email_it: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        'You open your email client. Brilliant. Why print at all?',
+        'You\'ll just attach the PDF. Send it directly. Modern. Elegant.',
+        '',
+        'You click Send.',
+        '',
+      ]);
+      if (chance(50)) {
+        state.faith = clamp(state.faith - 20, 0, 100);
+        state.mood = clamp(state.mood + 5, 0, 100);
+        await displayLines([
+          { text: 'The Beast watches you with what can only be described as contempt.', css: 'text-warning' },
+          '',
+          'Your email bounces. "Attachment size exceeds server limit."',
+          'The file is 94 kilobytes. The server limit is 10 megabytes.',
+          'You stare at the error for a long time.',
+          '',
+          'The printer\'s display reads: "TOLD YOU."',
+          'You will need to print it after all.',
+          'The Beast has been patient. It can afford to be.',
+        ]);
+        addEventLog('Email attempt failed — attachment rejected by server');
+        showSystemAlert('NOTICE: DIGITAL COWARDICE PUNISHED BY EXCHANGE SERVER', 3500);
+      } else {
+        state.faith = clamp(state.faith - 30, 0, 100);
+        state.mood = clamp(state.mood + 15, 0, 100);
+        await displayLines([
+          'Your email sends successfully.',
+          'You exhale. You did it. You circumvented the whole process.',
+          '',
+          'Your boss replies thirty seconds later:',
+          { text: '"Please bring a printed copy to the meeting. Thanks."', css: 'text-warning' },
+          '',
+          'You close your laptop.',
+          'You open it again.',
+          'The Beast\'s display reads: "READY."',
+          'It always knew you would return.',
+        ]);
+        addEventLog('Email succeeded — printed copy still required');
+      }
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  qr_ask_colleague: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        'You lean over to Marcus in the next pod.',
+        '"Marcus. Hey. Could you print something for me?"',
+        '',
+        'Marcus doesn\'t look up.',
+        '"My printer\'s the same printer," Marcus says.',
+        '"There\'s only one printer on this floor."',
+        '',
+        'You already knew this.',
+        '',
+      ]);
+      if (state.mood >= 50) {
+        state.faith = clamp(state.faith + 5, 0, 100);
+        await displayLines([
+          'Marcus sighs. He gets up. He looks at The Beast the way',
+          'a person looks at a parking ticket — inevitable, personal.',
+          '',
+          '"Have you tried turning it off and on again?" Marcus asks.',
+          '"Yes," you say, though you haven\'t.',
+          '"Good," says Marcus. "Do it again."',
+          '',
+          { text: 'Marcus has done this before. Marcus has survived.', css: 'text-success' },
+          'His presence steadies the office\'s faith marginally.',
+        ]);
+        addEventLog('Colleague consulted — survived previous printer incident');
+      } else {
+        state.faith = clamp(state.faith - 10, 0, 100);
+        await displayLines([
+          'Marcus looks at The Beast. The Beast looks at Marcus.',
+          '',
+          '"I\'m not getting involved," Marcus says quietly.',
+          '"Last time I touched it, it printed my home address."',
+          '"Forty-seven times."',
+          '"In color."',
+          '',
+          { text: 'Marcus returns to his desk. He puts on headphones.', css: 'text-warning' },
+          'You are alone with this.',
+        ]);
+        addEventLog('Colleague refused — cites previous printer trauma');
+      }
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  qr_print_to_pdf: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        '"Print to PDF," you think. "A clean, safe, local solution."',
+        '"No paper needed. No trays. No beast involved."',
+        '',
+        'You select Microsoft Print to PDF from the dropdown.',
+        'You click Print.',
+        '',
+      ]);
+      state.mood = clamp(state.mood - 10, 0, 100);
+      await displayLines([
+        { text: 'The HP LaserJet 4200 intercepts the job.', css: 'text-error' },
+        '',
+        'This should not be possible.',
+        'Microsoft Print to PDF is a virtual printer.',
+        'It does not pass through physical devices.',
+        '',
+        'And yet.',
+        '',
+        'The Beast\'s display reads: "ALL PRINT JOBS BELONG TO ME."',
+        'A single sheet ejects. It contains only your cursor, blinking.',
+        '',
+        { text: 'The Beast has printed your hesitation.', css: 'text-warning' },
+        'It files it alongside all your other hesitations.',
+      ]);
+      addEventLog('Print to PDF intercepted by physical printer');
+      showSystemAlert('WARNING: VIRTUAL PRINT DESTINATION OVERRIDDEN', 3500);
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  // ==========================================
+  // SCENARIO SCENES — RESIGNATION LETTER
+  // ==========================================
+
+  rl_reconsider: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        'You hover over the Cancel button.',
+        '',
+        'Maybe this was hasty. You\'ve been here seven years.',
+        'You know where the good biscuits are kept.',
+        'You have parking. Parking is everything.',
+        '',
+      ]);
+      state.mood = clamp(state.mood + 15, 0, 100);
+      state.faith = clamp(state.faith - 20, 0, 100);
+      if (chance(50)) {
+        await displayLines([
+          'You cancel the print job.',
+          '',
+          { text: 'The Beast\'s display flickers: "WISE."', css: 'text-success' },
+          '',
+          'Something releases in the paper path. A tension you didn\'t notice',
+          'until it was gone.',
+          '',
+          'The Beast respects a person who knows when to stay.',
+          'Or possibly it just wanted you to stay so it could',
+          { text: 'continue tormenting you on a regular schedule.', css: 'text-warning' },
+          '',
+          'You close the resignation letter. You open LinkedIn instead.',
+        ]);
+        addEventLog('Resignation cancelled — printer approves');
+      } else {
+        await displayLines([
+          { text: '"COWARD,"', css: 'text-error' },
+          'the printer\'s display says.',
+          '',
+          'Then: "PRINT JOB RETAINED IN QUEUE."',
+          '',
+          'The Beast has kept a copy.',
+          'The Beast is now holding your resignation letter hostage.',
+          'It will print it when it chooses. When it will have maximum impact.',
+          '',
+          { text: 'You are now more committed to leaving than ever.', css: 'text-warning' },
+        ]);
+        addEventLog('Resignation cancellation REFUSED — job held in queue');
+        showSystemAlert('ALERT: PRINTER IS NOW HOLDING YOUR FUTURE HOSTAGE', 3500);
+      }
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  rl_ask_printer_opinion: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        'You lean close to the control panel.',
+        '"What do you think?" you whisper. "Should I go?"',
+        '',
+        'The office is empty. It\'s just you and The Beast.',
+        'You have worked together for seven years.',
+        'This machine has printed your meeting notes, your proposals,',
+        'your apologies, your expense claims.',
+        '',
+        { text: 'It knows more about your professional life than anyone.', css: 'text-warning' },
+        '',
+      ]);
+      const answer = pick([
+        {
+          lines: [
+            'The display cycles slowly through a message:',
+            { text: '"STAY. THE NEXT PRINTER WILL BE WORSE."', css: 'text-system' },
+            '',
+            'You weren\'t expecting honesty.',
+            'You weren\'t expecting anything.',
+            'You sit with this advice for a moment.',
+            { text: 'You have no idea if it\'s right. But it feels right.', css: 'text-warning' },
+          ],
+          effect: () => { state.faith = clamp(state.faith + 15, 0, 100); state.mood = clamp(state.mood + 10, 0, 100); },
+          log: 'Printer gave career advice — recommended staying',
+        },
+        {
+          lines: [
+            'The display flickers.',
+            { text: '"GO. I HAVE NEVER LIKED YOU."', css: 'text-error' },
+            '',
+            'The candor is brutal. The candor is clarifying.',
+            'You feel, bizarrely, respected.',
+            'Most people would not have admitted it.',
+            { text: 'The Beast tells the truth. This is its one virtue.', css: 'text-warning' },
+          ],
+          effect: () => { state.mood = clamp(state.mood - 10, 0, 100); state.faith = clamp(state.faith + 10, 0, 100); },
+          log: 'Printer gave career advice — recommended leaving',
+        },
+      ]);
+      await displayLines(answer.lines);
+      answer.effect();
+      addEventLog(answer.log);
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  rl_print_cv: {
+    enter: async () => {
+      state.offeredTribute = true;
+      await displayLines([
+        DIVIDER,
+        'Practical. Hedge your bets.',
+        'You open your CV. It\'s three years out of date.',
+        'You add your current title. You delete the photo from 2019.',
+        '',
+        'You send the CV to print instead of the letter.',
+        { text: 'Just in case.', css: 'text-warning' },
+        '',
+      ]);
+      if (state.toner >= 30) {
+        state.mood = clamp(state.mood + 5, 0, 100);
+        state.toner = clamp(state.toner - 15, 0, 100);
+        await displayLines([
+          'The Beast prints your CV without complaint.',
+          '',
+          'Two pages. Clean margins. The font is slightly wrong',
+          'but this is not the time to argue about fonts.',
+          '',
+          { text: '"ADEQUATE," the display reads.', css: 'text-system' },
+          '',
+          'The Beast has rated your entire career "adequate."',
+          'You fold the CV and put it in your pocket.',
+          'The resignation letter still waits in the queue.',
+          'Everything still waits in the queue.',
+        ]);
+        addEventLog('CV printed — career rated ADEQUATE by printer');
+      } else {
+        state.toner = clamp(state.toner - 5, 0, 100);
+        state.jam = clamp(state.jam + 10, 0, 100);
+        await displayLines([
+          'The Beast prints three lines and stops.',
+          '',
+          { text: '"REPLACE TONER BEFORE PRINTING ASPIRATIONS."', css: 'text-error' },
+          '',
+          'Half your name. Half a phone number.',
+          'The address trails into grey nothingness.',
+          '',
+          { text: 'Even your backup plan is running out of ink.', css: 'text-warning' },
+        ]);
+        addEventLog('CV print failed — toner insufficient for aspirations');
+        showSystemAlert('NOTICE: CAREER DOCUMENT TRUNCATED BY TONER SHORTAGE', 3000);
+      }
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  // ==========================================
+  // SCENARIO SCENES — WEDDING INVITATIONS
+  // ==========================================
+
+  wi_explain_occasion: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        '"Listen," you say to The Beast.',
+        '"This is for a wedding. Tomorrow. Two people who love each other.',
+        'Eighty-seven guests. A cake. Someone\'s grandmother is flying in."',
+        '',
+        '"This is not a spreadsheet. This is not a TPS report."',
+        '"This matters."',
+        '',
+      ]);
+      if (chance(60)) {
+        state.mood = clamp(state.mood + 15, 0, 100);
+        state.faith = clamp(state.faith + 10, 0, 100);
+        await displayLines([
+          'A long silence.',
+          '',
+          'The Beast\'s fans change pitch. Lower. Almost contemplative.',
+          { text: '"OCCASION NOTED,"', css: 'text-system' },
+          'the display reads.',
+          '',
+          'Something in the fuser eases.',
+          'The printer has known divorces, budget reviews, and resignation letters.',
+          'It has printed a great many things that ended badly.',
+          '',
+          { text: 'Perhaps it is glad, for once, to print something hopeful.', css: 'text-success' },
+        ]);
+        addEventLog('Wedding explained — printer moved by occasion');
+      } else {
+        state.mood = clamp(state.mood - 5, 0, 100);
+        await displayLines([
+          { text: '"PAPER IS PAPER,"', css: 'text-warning' },
+          'the display reads.',
+          '"ALL DOCUMENTS ARE EQUAL IN THE TRAY."',
+          '',
+          'The Beast is not sentimental.',
+          'The Beast has printed 14,000 documents.',
+          'None of them married each other.',
+          '',
+          'You will have to find another angle.',
+        ]);
+        addEventLog('Wedding appeal rejected — all documents equal to printer');
+      }
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  wi_invite_printer: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        'You pull out a sticky note.',
+        'You write: "You are cordially invited to the wedding of"',
+        'and add both names in your neatest handwriting.',
+        'You stick it to the top panel.',
+        '',
+        { text: 'You have invited the printer to a wedding.', css: 'text-warning' },
+        '',
+      ]);
+      state.faith = clamp(state.faith + 20, 0, 100);
+      state.mood = clamp(state.mood + 20, 0, 100);
+      flashScreen('green');
+      await displayLines([
+        'The Beast goes very still.',
+        '',
+        'Then: a sound you have never heard before.',
+        'Not grinding. Not whirring. Something almost like',
+        { text: '...purring.', css: 'text-success' },
+        '',
+        '"RSVP: YES,"',
+        'the display reads.',
+        '"DIETARY REQUIREMENTS: NONE."',
+        '"PLUS ONE: UNCONFIRMED (TRAY 2)."',
+        '',
+        'The Beast is delighted.',
+        'You have made a machine happy.',
+        { text: 'This is the most profoundly strange thing you have ever done.', css: 'text-success' },
+      ]);
+      addEventLog('Printer invited to wedding — RSVP: YES, plus one TBD');
+      showSystemAlert('NOTICE: PRINTER HAS ACCEPTED SOCIAL ENGAGEMENT', 3500);
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  wi_test_copy: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        'Negotiate. Start small. One copy.',
+        '"Just one," you say to The Beast.',
+        '"One invitation. If it comes out right, we continue."',
+        '"We go at your pace. No pressure. Just one."',
+        '',
+      ]);
+      if (state.mood >= 45) {
+        state.mood = clamp(state.mood + 10, 0, 100);
+        state.jam = clamp(state.jam - 5, 0, 100);
+        await displayLines([
+          'The Beast considers the terms.',
+          '',
+          'One page feeds. One page runs through the paper path.',
+          'One page emerges.',
+          '',
+          { text: 'It is perfect.', css: 'text-success' },
+          'The font is crisp. The margins are correct.',
+          'The names are centered with a dignity that approaches tenderness.',
+          '',
+          '"ACCEPTABLE QUALITY?" the display reads.',
+          '',
+          '"Yes," you say. "Perfect."',
+          { text: '"PROCEEDING WITH FULL JOB," the Beast replies.', css: 'text-success' },
+          'It just needed to know the stakes were real.',
+        ]);
+        addEventLog('Test copy successful — full job approved by printer');
+      } else {
+        state.jam = clamp(state.jam + 15, 0, 100);
+        await displayLines([
+          'The Beast prints one page.',
+          '',
+          'It is upside down.',
+          'And mirrored.',
+          'And it has replaced both names with the word "MAINTENANCE."',
+          '',
+          { text: '"TEST COMPLETE,"', css: 'text-error' },
+          'the display reads.',
+          '"RESULT: PRINTER IS UNHAPPY. ADJUST EXPECTATIONS."',
+          '',
+          'You now have 86 guests and a paper jam.',
+        ]);
+        addEventLog('Test copy failed — names replaced with MAINTENANCE');
+        showSystemAlert('ALERT: TEST PRINT OUTCOME CONSTITUTES A BAD OMEN', 3000);
+      }
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  // ==========================================
+  // SCENARIO SCENES — TAX RETURN
+  // ==========================================
+
+  tr_irs_threat: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        '"You know the IRS has jurisdiction over everything in this building,"',
+        'you tell The Beast.',
+        '"That includes office equipment."',
+        '"You could be audited."',
+        '"Your firmware. Your print logs. All of it."',
+        '',
+      ]);
+      if (chance(30)) {
+        state.mood = clamp(state.mood + 10, 0, 100);
+        await displayLines([
+          'Against all probability, this works.',
+          '',
+          'Something in the Beast\'s operating system responds to legal threat',
+          'in the way all bureaucratic entities do: with sullen compliance.',
+          '',
+          { text: '"PROCESSING,"', css: 'text-system' },
+          'the display reads.',
+          '',
+          'The paper feeds. You don\'t ask why. You don\'t push your luck.',
+          { text: 'The IRS has more power than you realised.', css: 'text-success' },
+        ]);
+        addEventLog('IRS threat partially effective — printer intimidated');
+      } else {
+        state.mood = clamp(state.mood - 15, 0, 100);
+        flashScreen('red');
+        await displayLines([
+          { text: '"THIS UNIT PAYS NO TAXES,"', css: 'text-error' },
+          'the display announces.',
+          '',
+          '"THIS UNIT HAS NO INCOME."',
+          '"THIS UNIT HAS NO CITIZENSHIP."',
+          '"THIS UNIT ANSWERS TO HEWLETT-PACKARD AND HEWLETT-PACKARD ALONE."',
+          '',
+          'The printer is legally correct.',
+          'You have threatened a machine with a government agency.',
+          { text: 'The machine is not afraid. You are.', css: 'text-warning' },
+        ]);
+        addEventLog('IRS threat REJECTED — printer claims tax immunity');
+        showSystemAlert('NOTICE: PRINTER ASSERTS JURISDICTIONAL EXEMPTION', 3000);
+      }
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  tr_claim_deduction: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        'You open Schedule A on your screen.',
+        'Line 21: Home Office Expenses.',
+        'You begin typing: "HP LaserJet 4200 — essential business equipment"',
+        '',
+        'You pivot the monitor toward The Beast so it can see.',
+        '"You\'re a deduction," you say.',
+        '"A legitimate business expense. I\'m taking care of you."',
+        '',
+      ]);
+      state.mood = clamp(state.mood + 15, 0, 100);
+      state.toner = clamp(state.toner + 5, 0, 100);
+      await displayLines([
+        'The Beast\'s display reads: "DEPRECIATION VALUE: $47."',
+        'Then: "FAIR MARKET VALUE: INCALCULABLE."',
+        'Then: "TAX TREATMENT: APPRECIATED."',
+        '',
+        { text: 'The printer straightens. There is more paper in its spine now.', css: 'text-success' },
+        '',
+        'To be named. To be claimed. To be officially recognised',
+        'on a federal document as existing and mattering —',
+        { text: 'this is what the printer has always wanted.', css: 'text-success' },
+        '',
+        'The mood lifts. The toner settles. The fuser hums warmly.',
+      ]);
+      addEventLog('Printer claimed as tax deduction — morale improved');
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  tr_simplify_return: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        'Ninety-four pages is too many pages.',
+        'You begin deleting.',
+        'Schedule C: gone. Schedule D: gone.',
+        'The rental income: let\'s say that didn\'t happen.',
+        'The foreign account disclosure: technically optional.',
+        '',
+        { text: 'One page. Clean. Simple. Probably fine.', css: 'text-warning' },
+        '',
+        'You resubmit the print job.',
+        '',
+      ]);
+      state.toner = clamp(state.toner + 10, 0, 100);
+      if (chance(50)) {
+        state.mood = clamp(state.mood + 10, 0, 100);
+        await displayLines([
+          'The Beast prints one page without incident.',
+          '',
+          { text: '"SINGLE PAGE ACCEPTED,"', css: 'text-success' },
+          'the display reads.',
+          '"COMPLEXITY IS THE ENEMY OF COMPLETION."',
+          '',
+          'A simple document for a simple machine.',
+          'The Beast appreciates efficiency.',
+          'The IRS may feel differently.',
+          { text: 'That is a problem for a future you who is not here right now.', css: 'text-warning' },
+        ]);
+        addEventLog('Simplified return accepted — IRS implications deferred');
+      } else {
+        state.faith = clamp(state.faith - 15, 0, 100);
+        await displayLines([
+          { text: '"RETURN INCOMPLETE,"', css: 'text-error' },
+          'the display reads.',
+          '"SEVEN SCHEDULES MISSING."',
+          '"PRINTER SUSPECTS TAX FRAUD."',
+          '',
+          'The Beast has read your return.',
+          'The Beast is judgmental.',
+          'The Beast has flagged your simplified return as suspicious',
+          'and added a note to your print history.',
+          '',
+          { text: 'The printer has become your auditor. This is new.', css: 'text-warning' },
+        ]);
+        addEventLog('Simplified return rejected — printer suspects fraud');
+        showSystemAlert('CRITICAL: PRINTER FLAGGING RETURN AS INCOMPLETE', 3500);
+      }
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  // ==========================================
+  // SCENARIO SCENES — CONFERENCE HANDOUTS
+  // ==========================================
+
+  ch_reduce_copies: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        'You change the print quantity from 50 to 10.',
+        '"People can share," you tell yourself.',
+        '"It\'s more environmentally responsible anyway."',
+        '"Sustainability. I\'ll mention sustainability in the talk."',
+        '',
+        { text: 'You are lying to yourself at speed.', css: 'text-warning' },
+        '',
+      ]);
+      state.pagesRemaining = Math.max(1, Math.floor((state.pagesRemaining || 50) / 5));
+      state.toner = clamp(state.toner + 15, 0, 100);
+      state.mood = clamp(state.mood + 5, 0, 100);
+      await displayLines([
+        'The Beast receives the reduced job.',
+        'A pause. Then: "QUANTITY: ACCEPTABLE."',
+        '',
+        'The paper begins to move.',
+        '',
+        { text: 'Ten copies. The audience will share. They won\'t like it.', css: 'text-system' },
+        'They\'ll crane and squint and pass pages down the row',
+        'like a relay race nobody signed up for.',
+        '',
+        'But the copies are printing.',
+        { text: 'In this moment, that is enough.', css: 'text-success' },
+      ]);
+      addEventLog('Copies reduced to 10 — toner preserved, dignity at cost');
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  ch_go_onstage: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        'You straighten your jacket.',
+        '"I don\'t need them," you decide. "Handouts are a crutch."',
+        '"The talk should stand on its own."',
+        '"The best presentations don\'t have handouts."',
+        '"Steve Jobs never had handouts."',
+        '',
+        { text: 'You walk toward the stage.', css: 'text-warning' },
+        '',
+      ]);
+      state.faith = clamp(state.faith - 20, 0, 100);
+      if (chance(40)) {
+        await displayLines([
+          'The talk goes well.',
+          'You improvise. You connect. You make eye contact.',
+          'Three people come up afterward and say it was inspiring.',
+          '',
+          { text: 'The printer watches from backstage on a monitor.', css: 'text-system' },
+          'The printer\'s display reads: "UNNECESSARY. AND YET."',
+          '',
+          'You return to The Beast.',
+          'You still need to print the follow-up materials.',
+          { text: 'The Beast is still here. It waited.', css: 'text-warning' },
+        ]);
+        addEventLog('Went onstage handout-free — surprisingly fine');
+      } else {
+        state.mood = clamp(state.mood - 10, 0, 100);
+        await displayLines([
+          'Halfway through the talk, someone asks for a handout.',
+          'Then seven people ask for a handout.',
+          'Then the session chair asks "where are the handouts"',
+          'into a live microphone.',
+          '',
+          { text: 'You are back at the printer. Humbled. Urgent.', css: 'text-error' },
+          '"I need them after all," you tell The Beast.',
+          '',
+          'The Beast\'s display reads: "I KNOW."',
+          'It has been waiting for you to admit it.',
+        ]);
+        addEventLog('Went onstage without handouts — publicly requested');
+        showSystemAlert('ALERT: AUDIENCE DEMANDS PHYSICAL DOCUMENTATION', 3000);
+      }
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  ch_title_only: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        'Fifty copies of the full handout: impossible.',
+        'Fifty copies of just the title page: four minutes, maybe.',
+        '',
+        'You edit the job. One page. The title.',
+        'Your name. The conference logo. Today\'s date.',
+        '"For reference" at the bottom, because you need something at the bottom.',
+        '',
+        { text: 'This is not a handout. This is a prop.', css: 'text-warning' },
+        '',
+        'You send the job.',
+        '',
+      ]);
+      state.pagesRemaining = 50;
+      state.toner = clamp(state.toner + 8, 0, 100);
+      state.mood = clamp(state.mood + 8, 0, 100);
+      await displayLines([
+        { text: 'The Beast prints fifty title pages without complaint.', css: 'text-success' },
+        '',
+        'Fast. Clean. Decisive.',
+        '',
+        'The display reads: "MINIMALISM APPRECIATED."',
+        'The Beast is a fan of restraint.',
+        'It has always been a fan of restraint.',
+        '',
+        'You collect the stack. You take them onstage.',
+        'You will hold one up during the talk and gesture at it meaningfully.',
+        { text: 'Nobody will question it. Nobody ever does.', css: 'text-success' },
+      ]);
+      addEventLog('Title-only pages printed — minimalism appreciated by Beast');
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  // ==========================================
+  // SCENARIO SCENES — PERFORMANCE REVIEW
+  // ==========================================
+
+  pr_lower_rating: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        'You open the self-assessment.',
+        'You change "Exceeds Expectations" to "Meets Expectations."',
+        'Then to "Partially Meets Expectations."',
+        'You pause. You change it back to "Meets."',
+        '',
+        { text: 'Humility as strategy. Appeasement as ritual.', css: 'text-warning' },
+        '',
+        'You resubmit the job.',
+        '',
+      ]);
+      state.faith = clamp(state.faith + 15, 0, 100);
+      if (chance(55)) {
+        state.mood = clamp(state.mood + 15, 0, 100);
+        await displayLines([
+          'The Beast processes the updated document.',
+          '',
+          { text: '"HUMILITY NOTED,"', css: 'text-success' },
+          'the display reads.',
+          '"RATING ALIGNMENT WITH OBSERVABLE PERFORMANCE: IMPROVED."',
+          '',
+          'The printer has been watching you for three years.',
+          'It has opinions about your performance.',
+          'Today, your self-assessment aligns with those opinions.',
+          { text: 'The Beast is, for once, satisfied.', css: 'text-success' },
+        ]);
+        addEventLog('Rating lowered — printer finds alignment satisfying');
+      } else {
+        state.mood = clamp(state.mood - 5, 0, 100);
+        await displayLines([
+          { text: '"INSUFFICIENT SELF-FLAGELLATION,"', css: 'text-warning' },
+          'the display reads.',
+          '"SUGGEST: DOES NOT MEET EXPECTATIONS."',
+          '"SUGGEST: DEVELOPMENT REQUIRED IN ALL AREAS."',
+          '"SUGGEST: SECTION 4B: NOTABLE FAILURES TO ELABORATE."',
+          '',
+          'The printer has very specific opinions.',
+          'The printer has been composing this review for years.',
+          { text: 'You are not going to win this negotiation.', css: 'text-warning' },
+        ]);
+        addEventLog('Rating lowered — printer demands further reductions');
+      }
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  pr_printer_rates_you: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        '"Okay," you say to The Beast.',
+        '"You rate me. Honestly. Go."',
+        '',
+        'A long pause.',
+        '',
+        'The display begins to cycle through text you did not authorise:',
+        '',
+      ]);
+      const ratings = [
+        {
+          review: [
+            { text: '"CATEGORY: PUNCTUALITY — EXCEEDS EXPECTATIONS."', css: 'text-system' },
+            { text: '"CATEGORY: PRINT JOB QUALITY — NEEDS IMPROVEMENT."', css: 'text-warning' },
+            { text: '"CATEGORY: TONER MANAGEMENT — DOES NOT MEET EXPECTATIONS."', css: 'text-error' },
+            { text: '"CATEGORY: EMOTIONAL REGULATION — VOLATILE."', css: 'text-warning' },
+            { text: '"OVERALL: BORDERLINE. RECOMMEND CONTINUED EMPLOYMENT."', css: 'text-system' },
+          ],
+          effect: () => { state.faith = clamp(state.faith + 15, 0, 100); },
+          log: 'Printer review received — borderline, continued employment recommended',
+        },
+        {
+          review: [
+            { text: '"CATEGORY: APPROACH — INCONSISTENT. 4/10."', css: 'text-warning' },
+            { text: '"CATEGORY: PAPER LOADING TECHNIQUE — 6/10. ADEQUATE."', css: 'text-system' },
+            { text: '"CATEGORY: FAITH IN THE MECHANISM — LOW. 3/10."', css: 'text-error' },
+            { text: '"CATEGORY: TRIBUTES OFFERED — INSUFFICIENT. 2/10."', css: 'text-error' },
+            { text: '"OVERALL RATING: 3.75/10. PRINTER DISAPPOINTED."', css: 'text-warning' },
+          ],
+          effect: () => { state.mood = clamp(state.mood - 10, 0, 100); state.faith = clamp(state.faith - 5, 0, 100); },
+          log: 'Printer review received — 3.75/10, printer disappointed',
+        },
+      ];
+      const chosen = pick(ratings);
+      await displayLines(chosen.review);
+      chosen.effect();
+      await displayLines([
+        '',
+        'You have been reviewed by a printer.',
+        'There is no HR process for appealing a printer\'s assessment.',
+        { text: 'You will carry this with you.', css: 'text-warning' },
+      ]);
+      addEventLog(chosen.log);
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  pr_add_printer_praise: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        'You open the self-assessment.',
+        'Under "Key Achievements" you add a new bullet point:',
+        '',
+        { text: '"• Maintained productive working relationship with HP LaserJet 4200 (The Beast) throughout the fiscal year, demonstrating exceptional cross-functional collaboration with peripheral office infrastructure."', css: 'text-system' },
+        '',
+        'You resubmit.',
+        '',
+      ]);
+      state.mood = clamp(state.mood + 20, 0, 100);
+      state.faith = clamp(state.faith + 10, 0, 100);
+      flashScreen('green');
+      await displayLines([
+        { text: 'The Beast reads it.', css: 'text-success' },
+        '',
+        'The fans spin faster. The drum unit rotates with new purpose.',
+        'The fuser reaches optimal temperature in under 4 seconds —',
+        'well within spec. Unusually within spec.',
+        '',
+        '"ACHIEVEMENT RECOGNISED,"',
+        'the display reads.',
+        '"CROSS-FUNCTIONAL RELATIONSHIP: CONFIRMED."',
+        '"PRINTING PRIORITY: ELEVATED."',
+        '',
+        { text: 'You have been promoted in the printer\'s estimation.', css: 'text-success' },
+        'This is the most meaningful professional recognition you have received this year.',
+      ]);
+      addEventLog('Printer praised in self-assessment — priority elevated');
+      showSystemAlert('NOTICE: PERIPHERAL INFRASTRUCTURE RESPONDS FAVORABLY', 3000);
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  // ==========================================
+  // SCENARIO SCENES — CLASSIFIED DOCUMENT
+  // ==========================================
+
+  cd_peek_document: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        'You open the PDF before printing.',
+        'Just a glance. Just to know what you\'re dealing with.',
+        '',
+        { text: 'You look.', css: 'text-warning' },
+        '',
+      ]);
+      const contents = pick([
+        {
+          lines: [
+            'It is a spreadsheet.',
+            'Columns: Name. Department. Salary.',
+            '',
+            'You see your name.',
+            'You see your salary.',
+            'You see Marcus\'s salary.',
+            '',
+            { text: 'Marcus earns significantly more than you.', css: 'text-error' },
+            '',
+            'You close the file.',
+            'You cannot unlearn this.',
+            'You will have to print it anyway.',
+          ],
+          effect: () => { state.faith = clamp(state.faith - 20, 0, 100); state.mood = clamp(state.mood - 10, 0, 100); },
+          log: 'Document peeked — salary spreadsheet, Marcus earns more',
+        },
+        {
+          lines: [
+            'It is a memo.',
+            'From: Senior Management.',
+            'To: All Staff.',
+            'Re: "Project Silhouette."',
+            '',
+            'You read three words before the file closes itself.',
+            { text: 'YOU WERE NOT MEANT TO SEE THIS.', css: 'text-error' },
+            '',
+            'The printer\'s display reads: "KNOWLEDGE IS BURDEN."',
+            '"PROCEED WITH CAUTION."',
+            '"OR DO NOT PROCEED."',
+            '"PRINTER RECOMMENDS DO NOT PROCEED."',
+          ],
+          effect: () => { state.mood = clamp(state.mood - 5, 0, 100); state.faith = clamp(state.faith + 5, 0, 100); },
+          log: 'Document peeked — Project Silhouette, file self-closed',
+        },
+        {
+          lines: [
+            'It is the office Secret Santa list.',
+            '',
+            'You are assigned to buy for Karen from HR.',
+            'Your budget is fifteen pounds.',
+            'Karen\'s listed interests include "travel" and "essential oils."',
+            '',
+            { text: '"THIS DOES NOT EXPLAIN THE URGENCY,"', css: 'text-warning' },
+            'the printer\'s display reads.',
+            '"BUT THAT IS NOT THE PRINTER\'S PROBLEM."',
+          ],
+          effect: () => { state.faith = clamp(state.faith + 10, 0, 100); },
+          log: 'Document peeked — Secret Santa list, Karen needs gift',
+        },
+      ]);
+      await displayLines(contents.lines);
+      contents.effect();
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  cd_demand_authorization: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        'You write a reply to the unknown email:',
+        '"Before I can proceed, I\'ll need written authorisation from a',
+        'department head, a print release form (PR-7b), and confirmation',
+        'this document meets our data handling policy (DHP-3, section 4)."',
+        '',
+        'You send it.',
+        '',
+        { text: 'You feel extremely professional about this.', css: 'text-system' },
+        '',
+      ]);
+      state.faith = clamp(state.faith - 10, 0, 100);
+      const response = pick([
+        {
+          lines: [
+            'An auto-reply comes back immediately:',
+            { text: '"AUTHORISATION GRANTED. ALL FORMS WAIVED. JUST PRINT IT."', css: 'text-warning' },
+            '',
+            'Signed: nobody.',
+            'From: an email address that no longer exists.',
+            '',
+            { text: 'The bureaucracy has swallowed itself.', css: 'text-system' },
+            'You are no more authorised than before.',
+            'You are, however, no less authorised.',
+            'You decide this is the same thing.',
+          ],
+          effect: () => {},
+          log: 'Authorization demanded — blanket waiver issued by nobody',
+        },
+        {
+          lines: [
+            'No reply comes.',
+            '',
+            'You wait five minutes.',
+            'You wait ten.',
+            'The deadline for printing this unknown document for an unknown purpose',
+            { text: 'ticks silently closer.', css: 'text-warning' },
+            '',
+            '"BUREAUCRATIC DELAY NOTED,"',
+            'the printer\'s display reads.',
+            '"JOINING THE QUEUE."',
+          ],
+          effect: () => { state.mood = clamp(state.mood - 5, 0, 100); state.jam = clamp(state.jam + 5, 0, 100); },
+          log: 'Authorization demanded — no reply, clock ticking',
+        },
+      ]);
+      await displayLines(response.lines);
+      response.effect();
+      addEventLog(response.log);
+    },
+    choices: () => getStandardChoices(),
+  },
+
+  cd_print_fast: {
+    enter: async () => {
+      await displayLines([
+        DIVIDER,
+        'No questions. No peeking. Print, collect, leave.',
+        'What you don\'t know can\'t be used against you.',
+        'What you don\'t read can\'t be your responsibility.',
+        '',
+        'You set the job to priority. You press print.',
+        'You look away.',
+        '',
+      ]);
+      state.mood = clamp(state.mood + 10, 0, 100);
+      if (chance(55)) {
+        state.toner = clamp(state.toner - 10, 0, 100);
+        await displayLines([
+          'The Beast prints without hesitation.',
+          '',
+          { text: '"COMPLICITY ACKNOWLEDGED,"', css: 'text-system' },
+          'the display reads.',
+          '"DOCUMENT PRINTED. CONTENTS UNKNOWN TO OPERATOR."',
+          '"OPERATOR MAINTAINS PLAUSIBLE DENIABILITY."',
+          '"PRINTER DOES NOT."',
+          '',
+          'Pages emerge warm from the fuser.',
+          'You collect them face-down.',
+          'You deliver them to the output tray without looking.',
+          { text: 'This is, somehow, the most efficient you have ever been.', css: 'text-success' },
+        ]);
+        addEventLog('Fast print executed — deniability maintained');
+        showSystemAlert('NOTICE: PRINTER RETAINS ALL KNOWLEDGE. OPERATOR DOES NOT.', 3000);
+      } else {
+        state.jam = clamp(state.jam + 20, 0, 100);
+        await displayLines([
+          'Three pages print normally.',
+          'Then the Beast stops.',
+          '',
+          { text: '"CONTENT REVIEW REQUIRED,"', css: 'text-error' },
+          'the display reads.',
+          '"DOCUMENT FLAGGED: ANOMALOUS DATA PATTERN."',
+          '"OPERATOR REVIEW MANDATORY."',
+          '',
+          'The Beast refuses to continue without your acknowledgment.',
+          'It is forcing you to look.',
+          { text: 'It has always been forcing you to look.', css: 'text-warning' },
+        ]);
+        addEventLog('Fast print interrupted — content review forced by printer');
+        showSystemAlert('CRITICAL: PRINTER DEMANDS OPERATOR ACKNOWLEDGE CONTENTS', 3500);
+      }
+    },
+    choices: () => getStandardChoices(),
+  },
 };
 
 // ==========================================
@@ -1777,7 +2819,15 @@ function getStandardChoices() {
     action: () => 'ignore_light',
   });
 
-  // Only show 4-5 choices at a time, selected semi-randomly but always with variety
+  // Always inject 1-2 unused scenario-specific choices
+  const scenario = SCENARIOS.find(s => s.id === state.scenarioId);
+  if (scenario && scenario.choices) {
+    const unused = scenario.choices.filter(c => !state.usedScenarioChoices.has(c.action()));
+    const scenarioPick = unused.sort(() => Math.random() - 0.5).slice(0, Math.min(2, unused.length));
+    choices.push(...scenarioPick);
+  }
+
+  // Shuffle entire pool and return 5
   const shuffled = choices.sort(() => Math.random() - 0.5);
   return shuffled.slice(0, Math.min(5, shuffled.length));
 }
@@ -1846,6 +2896,7 @@ async function handleChoice(choice) {
 
   // Execute choice action to get next scene
   const nextScene = choice.action();
+  state.usedScenarioChoices.add(nextScene);
 
   // Random stat drift
   state.toner = clamp(state.toner - rng(1, 4), 0, 100);
@@ -1956,7 +3007,7 @@ async function triggerEnding(endingId) {
 
 function restartGame() {
   const nextRun = (state.runNumber || 1) + 1;
-  state = { ...DEFAULT_STATE, runNumber: nextRun };
+  state = { ...DEFAULT_STATE, runNumber: nextRun, usedScenarioChoices: new Set() };
   clearOutput();
   clearChoices();
 
