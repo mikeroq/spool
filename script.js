@@ -38,6 +38,76 @@ let isTyping = false;
 let choicesLocked = false;
 
 // ==========================================
+// AUDIO ENGINE (Web Audio API — no files needed)
+// ==========================================
+
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playTone({ type = 'square', freq = 440, freq2 = null, gain = 0.08, duration = 0.06, attack = 0.005, decay = 0.05 } = {}) {
+  if (!state.soundEnabled) return;
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gainNode = ctx.createGain();
+  osc.connect(gainNode);
+  gainNode.connect(ctx.destination);
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, ctx.currentTime);
+  if (freq2) osc.frequency.linearRampToValueAtTime(freq2, ctx.currentTime + duration);
+  gainNode.gain.setValueAtTime(0, ctx.currentTime);
+  gainNode.gain.linearRampToValueAtTime(gain, ctx.currentTime + attack);
+  gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + attack + decay);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + duration + 0.01);
+}
+
+// Subtle mechanical tick for each typed character
+let tickToggle = false;
+function playTypeClick() {
+  tickToggle = !tickToggle;
+  playTone({ type: 'square', freq: tickToggle ? 180 : 160, gain: 0.04, duration: 0.03, attack: 0.002, decay: 0.025 });
+}
+
+// Short click when a choice button is pressed
+function playChoiceClick() {
+  playTone({ type: 'square', freq: 320, freq2: 280, gain: 0.12, duration: 0.07, attack: 0.003, decay: 0.06 });
+}
+
+// Warning beep for system alerts and bad events
+function playWarning() {
+  playTone({ type: 'sawtooth', freq: 440, freq2: 380, gain: 0.15, duration: 0.2, attack: 0.01, decay: 0.18 });
+  setTimeout(() => playTone({ type: 'sawtooth', freq: 440, freq2: 380, gain: 0.1, duration: 0.15, attack: 0.01, decay: 0.13 }), 250);
+}
+
+// Positive chime for good outcomes / success
+function playSuccess() {
+  [440, 554, 659].forEach((freq, i) => {
+    setTimeout(() => playTone({ type: 'sine', freq, gain: 0.15, duration: 0.25, attack: 0.01, decay: 0.22 }), i * 100);
+  });
+}
+
+// Low impact thud for shake events
+function playImpact() {
+  playTone({ type: 'sawtooth', freq: 80, freq2: 40, gain: 0.25, duration: 0.3, attack: 0.005, decay: 0.28 });
+}
+
+// Printer whirr/grind for dramatic printer events
+function playPrinterNoise() {
+  [120, 140, 110, 150, 100].forEach((freq, i) => {
+    setTimeout(() => playTone({ type: 'sawtooth', freq, gain: 0.1, duration: 0.15, attack: 0.01, decay: 0.12 }), i * 80);
+  });
+}
+
+// Ascending blip for scene transitions
+function playTransition() {
+  playTone({ type: 'square', freq: 220, freq2: 330, gain: 0.08, duration: 0.12, attack: 0.005, decay: 0.1 });
+}
+
+// ==========================================
 // MOOD / JAM / LABEL HELPERS
 // ==========================================
 
@@ -163,6 +233,7 @@ function typewriteLine(text, cssClass) {
         p.appendChild(document.createTextNode(text[i]));
         p.appendChild(cursor);
         i++;
+        playTypeClick();
         scrollOutput();
         setTimeout(typeChar, msPerChar);
       } else {
@@ -225,17 +296,21 @@ function clearOutput() {
 function flashScreen(color = 'red') {
   flashEl.className = `screen-flash flash-${color}`;
   setTimeout(() => { flashEl.className = 'screen-flash'; }, 150);
+  if (color === 'red') playWarning();
+  else if (color === 'green') playSuccess();
 }
 
 function shakeScreen() {
   document.body.classList.add('shaking');
   setTimeout(() => document.body.classList.remove('shaking'), 400);
+  playImpact();
 }
 
 let alertTimeout = null;
 function showSystemAlert(text, duration = 3000) {
   alertTextEl.textContent = text;
   alertEl.classList.remove('hidden');
+  playWarning();
   if (alertTimeout) clearTimeout(alertTimeout);
   alertTimeout = setTimeout(() => {
     alertEl.classList.add('hidden');
@@ -254,6 +329,7 @@ function showChoices(choices) {
     btn.textContent = choice.text;
     btn.addEventListener('click', () => {
       if (choicesLocked) return;
+      playChoiceClick();
       handleChoice(choice).catch(err => {
         console.error('handleChoice error:', err);
         choicesLocked = false;
@@ -1616,6 +1692,7 @@ async function runScene(sceneId) {
     return;
   }
   state.currentScene = sceneId;
+  playTransition();
   await scene.enter();
 }
 
@@ -1697,10 +1774,14 @@ async function startGame() {
   showChoices(choices);
 }
 
-// Sound toggle (placeholder — no actual sounds, just the toggle)
 function toggleSound() {
   state.soundEnabled = !state.soundEnabled;
-  document.getElementById('sound-icon').textContent = state.soundEnabled ? '\u{1F50A}' : '\u{1F508}';
+  document.getElementById('sound-icon').textContent = state.soundEnabled ? '\u{1F50A}' : '\u{1F507}';
+  if (state.soundEnabled) {
+    // Resume AudioContext — browsers suspend it until a user gesture
+    getAudioCtx().resume();
+    playChoiceClick();
+  }
 }
 
 // Start the game on page load
