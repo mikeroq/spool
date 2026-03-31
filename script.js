@@ -14,6 +14,7 @@ const DEFAULT_STATE = {
   faith: 50,          // 0 = office has lost all hope, 100 = zealous belief
   pagesRemaining: 1,  // the sacred document
   currentScene: 'intro',
+  scenarioId: 'quarterly_report', // overwritten at game start
   turnCount: 0,
   calledGary: false,
   offeredTribute: false,
@@ -441,6 +442,236 @@ const CRISIS_EVENTS = [
 ];
 
 // ==========================================
+// SCENARIOS — one chosen randomly each run
+// ==========================================
+
+const SCENARIOS = [
+  {
+    id: 'quarterly_report',
+    document: 'the quarterly report',
+    startAlert: 'WARNING: PRINTER HAS ENTERED UNSTABLE SPIRITUAL STATE',
+    startLog: 'Quarterly report print job submitted',
+    startState: {},
+    lines: [
+      { text: '[ INCIDENT LOG — PRIORITY: MAXIMUM ]', css: 'text-system' },
+      '',
+      'It is 4:47 PM on a Friday.',
+      'You have one document. One page. One chance.',
+      'The quarterly report is due in thirteen minutes.',
+      '',
+      'You approach the HP LaserJet 4200 — known to the office only as',
+      { text: '"The Beast."', css: 'text-warning' },
+      '',
+      'It sits in the corner of the third floor, humming with ancient malice.',
+      'Its display reads: "READY." But you know better.',
+      'The Beast is never ready. The Beast is merely waiting.',
+      '',
+      'You press PRINT on your computer.',
+      'The Beast stirs.',
+      '',
+      { text: 'A single amber light begins to blink.', css: 'text-warning' },
+      'The office falls silent.',
+      '',
+      { text: 'The printer speaks: "PC LOAD LETTER."', css: 'text-error' },
+      '',
+      'Your journey begins.',
+    ],
+  },
+
+  {
+    id: 'resignation_letter',
+    document: 'the resignation letter',
+    startAlert: 'ALERT: HIGH-STAKES DOCUMENT DETECTED — TONER RESERVES TIGHTENING',
+    startLog: 'Resignation letter — departure ceremony at 5PM',
+    startState: { toner: 35 },
+    lines: [
+      { text: '[ INCIDENT LOG — CATEGORY: EXISTENTIAL ]', css: 'text-system' },
+      '',
+      'Today is your last day.',
+      'You typed the letter at 4:52 PM. Two paragraphs. Very dignified.',
+      '"Effective immediately." You used the good font.',
+      '',
+      'All that remains is to print it.',
+      'To make it real. Official. Irrevocable.',
+      '',
+      'You approach the HP LaserJet 4200.',
+      { text: 'It has known this moment was coming.', css: 'text-warning' },
+      '',
+      'The display reads: "READY."',
+      'The fuser hums — low, sardonic.',
+      '',
+      'You submit the print job.',
+      'The Beast considers whether to honor your departure or',
+      { text: 'make it one to remember.', css: 'text-warning' },
+      '',
+      { text: 'The printer speaks: "PC LOAD LETTER."', css: 'text-error' },
+      '',
+      'Of course it does.',
+    ],
+  },
+
+  {
+    id: 'wedding_invitations',
+    document: 'the wedding invitations',
+    startAlert: 'WARNING: CEREMONIAL DOCUMENT LOAD — TRAY SPIRITUALLY UNPREPARED',
+    startLog: 'Wedding invitations — ceremony tomorrow at 2PM',
+    startState: { faith: 65, jam: 10 },
+    lines: [
+      { text: '[ INCIDENT LOG — OCCASION: MATRIMONIAL ]', css: 'text-system' },
+      '',
+      'The wedding is tomorrow.',
+      'You have 87 guests. You have 87 invitations to print.',
+      'You have one printer.',
+      '',
+      'The florist has been paid. The caterer confirmed.',
+      'The officiant memorised the vows.',
+      'Everything is in order.',
+      '',
+      { text: 'Everything except this.', css: 'text-warning' },
+      '',
+      'You approach the HP LaserJet 4200.',
+      'It sits beneath the fluorescent lights like a jilted ex.',
+      'It has attended many office weddings. It approves of none of them.',
+      '',
+      'You send the print job.',
+      '',
+      { text: 'A single amber light begins to blink.', css: 'text-warning' },
+      { text: 'The printer speaks: "PC LOAD LETTER."', css: 'text-error' },
+      '',
+      'The guests are coming. The Beast is unmoved.',
+    ],
+  },
+
+  {
+    id: 'tax_return',
+    document: 'the tax return',
+    startAlert: 'CRITICAL: IRS DEADLINE IN 94 MINUTES — PRINTER UNMOVED BY LEGAL PRESSURE',
+    startLog: 'Tax return — IRS deadline tonight',
+    startState: { mood: 40, toner: 45 },
+    lines: [
+      { text: '[ INCIDENT LOG — AUTHORITY: FEDERAL ]', css: 'text-system' },
+      '',
+      'It is April 15th.',
+      'It is 10:26 PM.',
+      'The IRS does not accept "the printer was being spiritual" as an extension.',
+      '',
+      'Ninety-four pages. Seven years of receipts.',
+      'You have been preparing this return since February.',
+      '',
+      'You approach the HP LaserJet 4200.',
+      'The tax return is open on your screen.',
+      'The cursor blinks. The deadline does not.',
+      '',
+      { text: 'The Beast has no opinion about tax law.', css: 'text-warning' },
+      'It has opinions about everything else.',
+      '',
+      'You press PRINT.',
+      '',
+      { text: 'A single amber light begins to blink.', css: 'text-warning' },
+      { text: 'The printer speaks: "PC LOAD LETTER."', css: 'text-error' },
+      '',
+      'The IRS will not be sympathetic. The Beast does not care.',
+    ],
+  },
+
+  {
+    id: 'conference_handouts',
+    document: 'the conference handouts',
+    startAlert: 'WARNING: KEYNOTE IN 8 MINUTES — PRINTER ENTERING CONTEMPLATIVE STATE',
+    startLog: '50-copy handout job — keynote in 8 minutes',
+    startState: { pagesRemaining: 50, toner: 60, jam: 5 },
+    lines: [
+      { text: '[ INCIDENT LOG — VENUE: MAIN STAGE ]', css: 'text-system' },
+      '',
+      'The keynote begins in eight minutes.',
+      'Two hundred people are finding their seats.',
+      'The AV team has already done their check.',
+      'The slide clicker is charged.',
+      '',
+      'You need fifty copies of the handout.',
+      'Thirty-two pages each.',
+      '',
+      { text: 'You do the math. You wish you hadn\'t.', css: 'text-warning' },
+      '',
+      'You approach the HP LaserJet 4200.',
+      'It sits backstage, between the craft services table',
+      'and a box of unsold merchandise from last year\'s conference.',
+      '',
+      'You submit the job: 50 copies. Collated. Stapled.',
+      '',
+      { text: 'The Beast considers the request.', css: 'text-warning' },
+      { text: 'The printer speaks: "PC LOAD LETTER."', css: 'text-error' },
+      '',
+      'The audience is clapping for the warm-up speaker. Your time is running out.',
+    ],
+  },
+
+  {
+    id: 'performance_review',
+    document: 'the performance review',
+    startAlert: 'NOTICE: SELF-ASSESSMENT DOCUMENT DETECTED — PRINTER JUDGING IN RETURN',
+    startLog: 'Self-assessment due — HR waiting upstairs',
+    startState: { faith: 40, mood: 45 },
+    lines: [
+      { text: '[ INCIDENT LOG — SUBJECT: SELF-EVALUATION ]', css: 'text-system' },
+      '',
+      'HR sent the reminder three weeks ago.',
+      'Then two weeks ago. Then last Friday. Then this morning.',
+      'Then Karen from HR appeared at your desk and used the phrase',
+      { text: '"non-negotiable deadline."', css: 'text-warning' },
+      '',
+      'You have finally completed your annual self-assessment.',
+      'Eight pages. Single-spaced. You rated yourself "Exceeds Expectations"',
+      'in four categories. You will not be mentioning this to anyone.',
+      '',
+      'You approach the HP LaserJet 4200.',
+      'The printer has also been evaluating you.',
+      { text: 'The printer has also formed opinions.', css: 'text-warning' },
+      '',
+      'You submit the job.',
+      '',
+      { text: 'A single amber light begins to blink.', css: 'text-warning' },
+      { text: 'The printer speaks: "PC LOAD LETTER."', css: 'text-error' },
+      '',
+      '"Does not meet expectations," the printer implies.',
+    ],
+  },
+
+  {
+    id: 'classified_document',
+    document: 'the classified document',
+    startAlert: 'CRITICAL: UNCLASSIFIED PRINT DESTINATION FOR CLASSIFIED PAYLOAD',
+    startLog: 'Document: CLASSIFIED — origin: unknown sender in IT',
+    startState: { mood: 45, faith: 55, toner: 55 },
+    lines: [
+      { text: '[ INCIDENT LOG — CLEARANCE: UNKNOWN ]', css: 'text-system' },
+      '',
+      'The email arrived at 3:03 PM from an IT address you don\'t recognise.',
+      'Subject line: "PLEASE PRINT - URGENT."',
+      'Attachment: classified_document_FINAL_v3_REAL.pdf',
+      '',
+      'You don\'t know what\'s in it.',
+      'You don\'t know who sent it.',
+      'The instructions say to print it, leave it in the output tray,',
+      { text: 'and tell no one.', css: 'text-warning' },
+      '',
+      'You approach the HP LaserJet 4200.',
+      'It has printed classified documents before.',
+      'It has never told anyone about them either.',
+      '',
+      { text: 'You and The Beast have that in common.', css: 'text-warning' },
+      '',
+      'You send the job.',
+      '',
+      { text: 'A single amber light begins to blink.', css: 'text-warning' },
+      { text: 'The printer speaks: "PC LOAD LETTER."', css: 'text-error' },
+      '',
+      'Even secrets must wait their turn.',
+    ],
+  },
+];
+
+// ==========================================
 // SCENE DEFINITIONS
 // ==========================================
 
@@ -448,33 +679,11 @@ const SCENES = {
   // --- INTRO ---
   intro: {
     enter: async () => {
-      await displayLines([
-        { text: '[ INCIDENT LOG — PRIORITY: MAXIMUM ]', css: 'text-system' },
-        '',
-        'It is 4:47 PM on a Friday.',
-        'You have one document. One page. One chance.',
-        'The quarterly report is due in thirteen minutes.',
-        '',
-        'You approach the HP LaserJet 4200 — known to the office only as',
-        { text: '"The Beast."', css: 'text-warning' },
-        '',
-        'It sits in the corner of the third floor, humming with ancient malice.',
-        'Its display reads: "READY." But you know better.',
-        'The Beast is never ready. The Beast is merely waiting.',
-        '',
-        'You press PRINT on your computer.',
-        'The Beast stirs.',
-        '',
-        { text: 'A single amber light begins to blink.', css: 'text-warning' },
-        'The office falls silent.',
-        '',
-        { text: 'The printer speaks: "PC LOAD LETTER."', css: 'text-error' },
-        '',
-        'Your journey begins.',
-      ]);
-      addEventLog('Print job submitted');
+      const scenario = SCENARIOS.find(s => s.id === state.scenarioId) || SCENARIOS[0];
+      await displayLines(scenario.lines);
+      addEventLog(scenario.startLog);
       addEventLog('Amber warning light active');
-      showSystemAlert('WARNING: PRINTER HAS ENTERED UNSTABLE SPIRITUAL STATE', 4000);
+      showSystemAlert(scenario.startAlert, 4000);
     },
     choices: [
       {
@@ -1713,8 +1922,10 @@ async function triggerEnding(endingId) {
   addDivider();
 
   // Summary card
+  const scenario = SCENARIOS.find(s => s.id === state.scenarioId) || SCENARIOS[0];
   await displayLines([
     { text: '[ INCIDENT REPORT SUMMARY ]', css: 'text-system' },
+    { text: `Document: ${scenario.document}`, css: 'text-system' },
     { text: ending.summary, css: 'text-ending' },
     '',
     { text: `Turns survived: ${state.turnCount}`, css: 'text-system' },
@@ -1765,6 +1976,16 @@ async function startGame() {
   }
   localStorage.setItem('printerRunCount', state.runNumber);
   document.getElementById('run-counter').textContent = state.runNumber;
+
+  // Pick a random scenario (different from the last one if possible)
+  const lastScenarioId = localStorage.getItem('lastScenarioId');
+  const pool = SCENARIOS.filter(s => s.id !== lastScenarioId);
+  const scenario = pick(pool.length > 0 ? pool : SCENARIOS);
+  state.scenarioId = scenario.id;
+  localStorage.setItem('lastScenarioId', scenario.id);
+
+  // Apply scenario-specific starting state overrides
+  Object.assign(state, scenario.startState);
 
   updateStatusPanel();
   await runScene('intro');
