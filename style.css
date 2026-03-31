@@ -114,13 +114,6 @@ body.shaking {
 /* --- Text line styles --- */
 .text-line {
   margin-bottom: 0.3rem;
-  opacity: 0;
-  animation: fadeInLine 0.35s ease forwards;
-}
-
-@keyframes fadeInLine {
-  0% { opacity: 0; filter: blur(2px); }
-  100% { opacity: 1; filter: blur(0); }
 }
 
 .text-narrative {

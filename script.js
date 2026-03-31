@@ -133,18 +133,46 @@ function scrollOutput() {
   outputEl.scrollTop = outputEl.scrollHeight;
 }
 
-// Render a line of text with CSS fade-in animation
+// Typewriter effect: character by character with a blinking cursor
 function typewriteLine(text, cssClass) {
-  const p = document.createElement('p');
-  p.className = `text-line ${cssClass}`;
-  if (!text || text.length === 0) {
-    p.innerHTML = '&nbsp;';
-  } else {
-    p.textContent = text;
-  }
-  outputEl.appendChild(p);
-  scrollOutput();
-  return Promise.resolve();
+  return new Promise((resolve) => {
+    const p = document.createElement('p');
+    p.className = `text-line ${cssClass}`;
+
+    // Empty lines render instantly
+    if (!text || text.length === 0) {
+      p.innerHTML = '&nbsp;';
+      outputEl.appendChild(p);
+      scrollOutput();
+      resolve();
+      return;
+    }
+
+    outputEl.appendChild(p);
+
+    const cursor = document.createElement('span');
+    cursor.className = 'typewriter-cursor';
+    p.appendChild(cursor);
+
+    let i = 0;
+    const msPerChar = 28; // ~35 chars/sec — readable but clearly "typed"
+
+    function typeChar() {
+      if (i < text.length) {
+        cursor.remove();
+        p.appendChild(document.createTextNode(text[i]));
+        p.appendChild(cursor);
+        i++;
+        scrollOutput();
+        setTimeout(typeChar, msPerChar);
+      } else {
+        cursor.remove();
+        scrollOutput();
+        resolve();
+      }
+    }
+    typeChar();
+  });
 }
 
 // Instant line (no typewriter)
@@ -180,7 +208,7 @@ async function displayLines(lines) {
     } else {
       await typewriteLine(line.text, line.css || 'text-narrative', line.speed || 15);
     }
-    await sleep(150);
+    await sleep(180);
   }
   choicesLocked = false;
 }
