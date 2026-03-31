@@ -1,0 +1,325 @@
+/* ============================================
+   PLEAD WITH THE PRINTER - Custom Styles
+   Terminal aesthetic on top of DaisyUI dark theme
+   ============================================ */
+
+/* --- Base & Fonts --- */
+body {
+  font-family: 'Share Tech Mono', 'Courier New', monospace;
+  background: #0a0a0a;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* --- Scanline Overlay --- */
+.scanlines {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 255, 0, 0.015) 2px,
+    rgba(0, 255, 0, 0.015) 4px
+  );
+}
+
+/* --- Screen Flash Effect --- */
+.screen-flash {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: transparent;
+  transition: background 0.05s;
+}
+
+.screen-flash.flash-red {
+  background: rgba(255, 0, 0, 0.15);
+}
+
+.screen-flash.flash-green {
+  background: rgba(0, 255, 0, 0.1);
+}
+
+.screen-flash.flash-amber {
+  background: rgba(255, 170, 0, 0.12);
+}
+
+/* --- Screen Shake --- */
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-4px, 2px); }
+  20% { transform: translate(3px, -3px); }
+  30% { transform: translate(-2px, 4px); }
+  40% { transform: translate(4px, -1px); }
+  50% { transform: translate(-3px, 3px); }
+  60% { transform: translate(2px, -4px); }
+  70% { transform: translate(-4px, 1px); }
+  80% { transform: translate(3px, 3px); }
+  90% { transform: translate(-1px, -2px); }
+}
+
+body.shaking {
+  animation: shake 0.4s ease-in-out;
+}
+
+/* --- Title --- */
+.title-text {
+  font-family: 'VT323', 'Share Tech Mono', monospace;
+  color: #ff3333;
+  text-shadow:
+    0 0 10px rgba(255, 50, 50, 0.7),
+    0 0 30px rgba(255, 50, 50, 0.4),
+    0 0 60px rgba(255, 50, 50, 0.2);
+  letter-spacing: 0.15em;
+}
+
+.subtitle-text {
+  font-family: 'Share Tech Mono', monospace;
+  text-shadow: 0 0 8px rgba(255, 170, 0, 0.3);
+}
+
+/* --- Terminal Card --- */
+.terminal-card {
+  box-shadow:
+    0 0 15px rgba(0, 255, 0, 0.05),
+    inset 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+/* --- Terminal Output --- */
+.terminal-output {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  scrollbar-width: thin;
+  scrollbar-color: #1a3a1a #0a0a0a;
+}
+
+.terminal-output::-webkit-scrollbar {
+  width: 6px;
+}
+
+.terminal-output::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+.terminal-output::-webkit-scrollbar-thumb {
+  background: #1a3a1a;
+  border-radius: 3px;
+}
+
+/* --- Text line styles --- */
+.text-line {
+  margin-bottom: 0.3rem;
+  opacity: 0;
+  animation: fadeInLine 0.35s ease forwards;
+}
+
+@keyframes fadeInLine {
+  0% { opacity: 0; filter: blur(2px); }
+  100% { opacity: 1; filter: blur(0); }
+}
+
+.text-narrative {
+  color: #44dd44;
+}
+
+.text-warning {
+  color: #ffaa00;
+  font-weight: bold;
+}
+
+.text-error {
+  color: #ff4444;
+  font-weight: bold;
+}
+
+.text-system {
+  color: #00aaaa;
+  font-style: italic;
+}
+
+.text-success {
+  color: #44ff88;
+  font-weight: bold;
+}
+
+.text-divider {
+  color: #224422;
+  user-select: none;
+}
+
+.text-ending-title {
+  color: #ffcc00;
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(255, 200, 0, 0.4);
+  margin-top: 0.5rem;
+}
+
+.text-ending {
+  color: #aaddaa;
+  font-style: italic;
+}
+
+/* Typewriter cursor blink */
+.typewriter-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1em;
+  background: #44dd44;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: cursorBlink 0.6s step-end infinite;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* --- Choice Buttons --- */
+#choices-container .btn {
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  border-color: rgba(0, 255, 0, 0.3);
+  color: #44dd44;
+  background: rgba(0, 40, 0, 0.4);
+  transition: all 0.15s ease;
+}
+
+#choices-container .btn:hover {
+  background: rgba(0, 80, 0, 0.5);
+  border-color: rgba(0, 255, 0, 0.6);
+  box-shadow: 0 0 12px rgba(0, 255, 0, 0.2);
+  color: #88ff88;
+}
+
+#choices-container .btn:active {
+  transform: scale(0.97);
+}
+
+/* --- Status Panel --- */
+.stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: rgba(0, 255, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* Badge mood colors */
+.mood-hostile { background: #cc2200 !important; color: #fff !important; }
+.mood-angry { background: #dd4400 !important; color: #fff !important; }
+.mood-suspicious { background: #cc6600 !important; color: #fff !important; }
+.mood-uncertain { background: #aa8800 !important; color: #fff !important; }
+.mood-neutral { background: #557722 !important; color: #fff !important; }
+.mood-receptive { background: #228844 !important; color: #fff !important; }
+.mood-pleased { background: #22aa66 !important; color: #fff !important; }
+.mood-divine { background: #8844cc !important; color: #fff !important; }
+
+/* Jam severity colors */
+.jam-none { background: #225522 !important; color: #aaffaa !important; }
+.jam-minor { background: #887700 !important; color: #fff !important; }
+.jam-moderate { background: #aa5500 !important; color: #fff !important; }
+.jam-severe { background: #cc2200 !important; color: #fff !important; }
+.jam-apocalyptic { background: #990033 !important; color: #fff !important; animation: pulseRed 1s infinite; }
+
+@keyframes pulseRed {
+  0%, 100% { box-shadow: 0 0 4px rgba(200, 0, 50, 0.5); }
+  50% { box-shadow: 0 0 12px rgba(200, 0, 50, 0.9); }
+}
+
+/* --- System Alert Banner --- */
+.system-alert {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 998;
+  text-align: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: rgba(200, 0, 0, 0.9);
+  color: #fff;
+  font-family: 'Share Tech Mono', monospace;
+  animation: alertSlide 0.3s ease-out;
+}
+
+.system-alert.hidden {
+  display: none;
+}
+
+@keyframes alertSlide {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+/* --- Blink Animations --- */
+.blink-slow {
+  animation: blinkSlow 2s step-end infinite;
+}
+
+@keyframes blinkSlow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+.blink-fast {
+  animation: blinkFast 0.5s step-end infinite;
+}
+
+@keyframes blinkFast {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* --- Event Log --- */
+#event-log {
+  scrollbar-width: thin;
+  scrollbar-color: #1a2a1a #0a0a0a;
+}
+
+#event-log p {
+  border-left: 2px solid rgba(0, 255, 0, 0.1);
+  padding-left: 0.5rem;
+}
+
+/* --- Progress bar color overrides --- */
+.progress-warning::-webkit-progress-value { background: #ddaa00; }
+.progress-info::-webkit-progress-value { background: #22aacc; }
+
+/* --- Ending summary card --- */
+.ending-card {
+  border: 1px solid rgba(255, 200, 0, 0.3);
+  background: rgba(30, 20, 0, 0.5);
+  padding: 1rem;
+  margin-top: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .title-text {
+    font-size: 1.8rem;
+  }
+  .terminal-output {
+    height: 320px !important;
+    font-size: 0.82rem;
+  }
+}

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPOOL</title>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-black text-green-400 font-mono">
+
+  <!-- Scanline overlay -->
+  <div class="scanlines"></div>
+
+  <!-- Screen flash overlay -->
+  <div id="screen-flash" class="screen-flash"></div>
+
+  <!-- System alert banner -->
+  <div id="system-alert" class="system-alert hidden">
+    <span id="system-alert-text"></span>
+  </div>
+
+  <div class="container mx-auto max-w-6xl px-4 py-6">
+
+    <!-- Header -->
+    <header class="text-center mb-6">
+      <h1 class="title-text text-4xl md:text-6xl font-bold tracking-widest mb-2">
+        SPOOL
+      </h1>
+      <p class="subtitle-text text-sm md:text-base text-amber-500/80 tracking-wide">
+        A Text Adventure of Toner, Fear, and Bureaucratic Submission
+      </p>
+      <div class="divider divider-warning my-2 opacity-40"></div>
+    </header>
+
+    <div class="flex flex-col lg:flex-row gap-4">
+
+      <!-- Main terminal area -->
+      <div class="flex-1 min-w-0">
+        <div class="card bg-base-300/50 border border-green-900/50 shadow-xl terminal-card">
+          <div class="card-body p-0">
+            <!-- Terminal header bar -->
+            <div class="flex items-center gap-2 px-4 py-2 bg-green-950/40 border-b border-green-900/30 rounded-t-2xl">
+              <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+              <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+              <span class="text-xs text-green-600/60 ml-2 tracking-wider">PRINTER_CRISIS_TERMINAL v6.66</span>
+              <span class="text-xs text-green-600/40 ml-auto blink-slow">&#9679; LIVE</span>
+            </div>
+
+            <!-- Scrolling text output -->
+            <div id="text-output" class="terminal-output px-4 py-3 overflow-y-auto" style="height: 420px;">
+              <!-- Story text appended here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Choice buttons area -->
+        <div id="choices-container" class="mt-4 flex flex-wrap gap-2">
+          <!-- Choice buttons injected here -->
+        </div>
+      </div>
+
+      <!-- Side panel -->
+      <div class="lg:w-72 flex-shrink-0">
+        <!-- Status panel -->
+        <div class="card bg-base-300/50 border border-amber-900/40 shadow-xl">
+          <div class="card-body p-4">
+            <h2 class="card-title text-amber-500 text-sm tracking-widest mb-3">
+              &#9888; SYSTEM STATUS
+            </h2>
+
+            <div class="space-y-3">
+              <div class="stat-row">
+                <span class="stat-label">Printer Mood</span>
+                <span id="stat-mood" class="badge badge-warning badge-sm">UNCERTAIN</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Toner Level</span>
+                <div class="flex items-center gap-2 flex-1 justify-end">
+                  <progress id="stat-toner" class="progress progress-warning w-20 h-2" value="50" max="100"></progress>
+                  <span id="stat-toner-text" class="text-xs text-amber-400/70 w-8 text-right">50%</span>
+                </div>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Paper Jam</span>
+                <span id="stat-jam" class="badge badge-error badge-sm">NONE</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Office Faith</span>
+                <div class="flex items-center gap-2 flex-1 justify-end">
+                  <progress id="stat-faith" class="progress progress-info w-20 h-2" value="50" max="100"></progress>
+                  <span id="stat-faith-text" class="text-xs text-cyan-400/70 w-8 text-right">50%</span>
+                </div>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Pages Left</span>
+                <span id="stat-pages" class="text-lg font-bold text-green-400">1</span>
+              </div>
+            </div>
+
+            <div class="divider my-2 opacity-20"></div>
+
+            <!-- Mini event log -->
+            <div id="event-log" class="text-xs text-green-600/50 space-y-1 max-h-32 overflow-y-auto">
+              <p>&gt; System initialized...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="mt-3 flex gap-2">
+          <button id="btn-restart" class="btn btn-outline btn-error btn-sm flex-1 tracking-wider" onclick="restartGame()">
+            &#8635; RESTART
+          </button>
+          <button id="btn-sound" class="btn btn-outline btn-ghost btn-sm" onclick="toggleSound()">
+            <span id="sound-icon">&#128264;</span>
+          </button>
+        </div>
+
+        <!-- Run counter -->
+        <div class="mt-3 text-center">
+          <span class="text-xs text-green-700/40">RUN #<span id="run-counter">1</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center mt-6 text-xs text-green-800/30">
+      <p>&copy; MMXXVI Toner Prophecy Division &mdash; All Rights Reserved Under Printer Canon Law</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
