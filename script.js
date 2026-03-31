@@ -2819,17 +2819,21 @@ function getStandardChoices() {
     action: () => 'ignore_light',
   });
 
-  // Always inject 1-2 unused scenario-specific choices
-  const scenario = SCENARIOS.find(s => s.id === state.scenarioId);
-  if (scenario && scenario.choices) {
-    const unused = scenario.choices.filter(c => !state.usedScenarioChoices.has(c.action()));
-    const scenarioPick = unused.sort(() => Math.random() - 0.5).slice(0, Math.min(2, unused.length));
-    choices.push(...scenarioPick);
+  // Shuffle generic choices and take 3
+  const genericShuffled = choices.sort(() => Math.random() - 0.5).slice(0, 3);
+
+  // Guarantee 1-2 unused scenario-specific choices always appear
+  const scenarioObj = SCENARIOS.find(s => s.id === state.scenarioId);
+  const scenarioPicks = [];
+  if (scenarioObj && scenarioObj.choices) {
+    const unused = scenarioObj.choices.filter(c => !state.usedScenarioChoices.has(c.action()));
+    const picked = unused.sort(() => Math.random() - 0.5).slice(0, Math.min(2, unused.length));
+    scenarioPicks.push(...picked);
   }
 
-  // Shuffle entire pool and return 5
-  const shuffled = choices.sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, Math.min(5, shuffled.length));
+  // Combine: scenario choices first so they're visible, then generic
+  const combined = [...scenarioPicks, ...genericShuffled];
+  return combined.sort(() => Math.random() - 0.5).slice(0, 5);
 }
 
 // ==========================================
